@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Page with Cart and Checkout</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: white;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: red;
+        }
+
+        .product-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .product {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            width: 100%;
+            max-width: 180px;
+            text-align: center;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .product img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        .add-button {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        .added {
+            background-color: darkred;
+        }
+
+        .total-price {
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: red;
+            margin: 20px 0;
+        }
+
+        .buy-now-button {
+            background-color: red;
+            color: white;
+            font-size: 1.2em;
+            padding: 15px 25px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            margin: 0 auto;
+            transition: background-color 0.3s;
+        }
+        .buy-now-button:hover {
+            background-color: darkred;
+        }
+        
+        .cart-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none;
+            flex-direction: column;
+            color: white;
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .cart-overlay-content {
+            background-color: #fff;
+            color: #333;
+            width: 90%;
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #ccc;
+        }
+        .cart-item img {
+            width: 50px;
+            height: 50px;
+            margin-right: 10px;
+        }
+        .cart-item-info {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+        .remove-button {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Product List</h1>
+
+    <div class="product-container">
+        <div class="product" data-name="Product 1" data-price="10" data-sku="P001">
+            <img src="https://cdn.yellowmessenger.com/OdroRSeDvtSI1730123184616.jpeg" alt="Product 1">
+            <h2>SKU: P001</h2>
+            <p>Package: 1 x 5 items</p>
+            <p>Total Price: $10.00</p>
+            <button class="add-button" onclick="addToCart(this, 'Product 1', 10, 'P001')">Add</button>
+        </div>
+        <div class="product" data-name="Product 2" data-price="15" data-sku="P002">
+            <img src="https://cdn.yellowmessenger.com/OdroRSeDvtSI1730123184616.jpeg" alt="Product 2">
+            <h2>SKU: P002</h2>
+            <p>Package: 1 x 10 items</p>
+            <p>Total Price: $15.00</p>
+            <button class="add-button" onclick="addToCart(this, 'Product 2', 15, 'P002')">Add</button>
+        </div>
+        <div class="product" data-name="Product 3" data-price="20" data-sku="P003">
+            <img src="https://cdn.yellowmessenger.com/OdroRSeDvtSI1730123184616.jpeg" alt="Product 3">
+            <h2>SKU: P003</h2>
+            <p>Package: 1 x 15 items</p>
+            <p>Total Price: $20.00</p>
+            <button class="add-button" onclick="addToCart(this, 'Product 3', 20, 'P003')">Add</button>
+        </div>
+        <div class="product" data-name="Product 4" data-price="25" data-sku="P004">
+            <img src="https://cdn.yellowmessenger.com/OdroRSeDvtSI1730123184616.jpeg" alt="Product 4">
+            <h2>SKU: P004</h2>
+            <p>Package: 1 x 20 items</p>
+            <p>Total Price: $25.00</p>
+            <button class="add-button" onclick="addToCart(this, 'Product 4', 25, 'P004')">Add</button>
+        </div>
+    </div>
+
+    <div class="total-price" id="totalPrice">Total: $0.00</div>
+    <button class="buy-now-button" onclick="showCartOverlay()">Buy Now</button>
+
+    <div class="cart-overlay" id="cartOverlay">
+        <div class="cart-overlay-content">
+            <h2>Shopping Cart</h2>
+            <div id="cartItems"></div>
+            <button class="buy-now-button" onclick="checkout()">Proceed to Buy</button>
+        </div>
+    </div>
+
+    <script>
+        let cart = [];
+
+        function addToCart(button, name, price, sku) {
+            button.classList.add("added");
+            button.innerText = "Added";
+
+            const existingItem = cart.find(item => item.sku === sku);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ name, price, sku, quantity: 1 });
+            }
+            updateCartTotal();
+        }
+
+        function updateCartTotal() {
+            const totalPriceEl = document.getElementById('totalPrice');
+            let total = 0;
+
+            cart.forEach(item => {
+                total += item.price * item.quantity;
+            });
+
+            totalPriceEl.innerText = `Total: $${total.toFixed(2)}`;
+        }
+
+        function showCartOverlay() {
+            const cartOverlay = document.getElementById('cartOverlay');
+            cartOverlay.style.display = 'flex';
+            updateCartDisplay();
+        }
+
+        function updateCartDisplay() {
+            const cartContainer = document.getElementById('cartItems');
+            cartContainer.innerHTML = ''; // Clear current cart display
+
+            cart.forEach((item, index) => {
+                const cartItem = document.createElement('div');
+                cartItem.classList.add('cart-item');
+                cartItem.innerHTML = `
+                    <div class="cart-item-info">
+                        <img src="https://cdn.yellowmessenger.com/OdroRSeDvtSI1730123184616.jpeg" alt="${item.name}">
+                        <div>
+                            <p><strong>${item.name}</strong></p>
+                            <p>SKU: ${item.sku}</p>
+                            <p>Quantity: ${item.quantity}</p>
+                            <p>Price: $${(item.price * item.quantity).toFixed(2)}</p>
+                        </div>
+                    </div>
+                    <button class="remove-button" onclick="removeFromCart(${index})">Remove</button>
+                `;
+                cartContainer.appendChild(cartItem);
+            });
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartTotal();
+            updateCartDisplay();
+        }
+
+        function checkout() {
+            alert("Proceeding to checkout with total amount: " + document.getElementById('totalPrice').innerText);
+            closeCartOverlay();
+        }
+
+        function closeCartOverlay() {
+            const cartOverlay = document.getElementById('cartOverlay');
+            cartOverlay.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
