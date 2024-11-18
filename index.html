@@ -3,279 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Page with Cart and Checkout</title>
+    <title>Product List</title>
     <style>
+        /* General styles for body and layout */
         body {
             font-family: Arial, sans-serif;
             background-color: white;
-            color: #333;
             margin: 0;
+            padding: 0;
+        }
+
+        /* Header styling */
+        header {
+            background-color: red;
+            color: white;
             padding: 20px;
-        }
-
-        h1 {
             text-align: center;
-            color: red;
+            font-size: 2rem;
         }
 
+        /* Container for products */
         .product-container {
-            display: flex;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 20px;
-            justify-content: center;
-            margin-top: 20px;
-        }
-
-        .product {
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            padding: 10px;
-            width: 100%;
-            max-width: 180px;
-            text-align: center;
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        .product img {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-            margin-bottom: 10px;
-            border-radius: 5px;
-        }
-        .add-button {
-            background-color: red;
-            color: white;
-            border: none;
-            padding: 10px;
-            cursor: pointer;
-            border-radius: 5px;
-            font-weight: bold;
-            width: 100%;
-            transition: background-color 0.3s;
-        }
-        .added {
-            background-color: darkred;
-        }
-
-        .total-price {
-            text-align: center;
-            font-size: 1.2em;
-            font-weight: bold;
-            color: red;
-            margin: 20px 0;
-        }
-
-        .buy-now-button {
-            background-color: red;
-            color: white;
-            font-size: 1.2em;
-            padding: 15px 25px;
-            font-weight: bold;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            display: block;
-            margin: 0 auto;
-            transition: background-color 0.3s;
-        }
-        .buy-now-button:hover {
-            background-color: darkred;
-        }
-
-        .cart-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            display: none;
-            flex-direction: column;
-            color: white;
-            z-index: 1000;
             padding: 20px;
-            overflow-y: auto;
         }
-        .cart-overlay-content {
-            background-color: #fff;
-            color: #333;
-            width: 90%;
-            max-width: 400px;
-            margin: auto;
-            padding: 20px;
+
+        /* Product card styling */
+        .product-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: auto;
             border-radius: 8px;
         }
-        .cart-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #ccc;
-        }
-        .cart-item img {
-            width: 50px;
-            height: 50px;
-            margin-right: 10px;
-        }
-        .cart-item-info {
-            display: flex;
-            align-items: center;
-            flex: 1;
-        }
-        .remove-button {
-            background-color: #ff4d4d;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 5px;
-            font-size: 0.9em;
+
+        .product-card h3 {
+            font-size: 1.1rem;
+            margin: 10px 0;
         }
 
-        .notification {
-            background-color: yellow;
-            color: black;
-            padding: 15px;
-            text-align: center;
-            margin: 20px 0;
+        .product-card p {
+            font-size: 1rem;
+            color: #555;
+        }
+
+        /* Style for product prices */
+        .product-card .price {
+            font-size: 1.2rem;
+            color: green;
             font-weight: bold;
-            display: none;
         }
     </style>
 </head>
 <body>
-    <h1>Product List</h1>
 
-    <div class="product-container">
-        <!-- Add your product details here. Example format -->
-        <div class="product" data-name="MAGNUM VANILLA ALMOND" data-price="10" data-sku="68770743">
-            <img src="https://via.placeholder.com/150" alt="MAGNUM VANILLA ALMOND">
-            <h2>MAGNUM VANILLA ALMOND</h2>
-            <p>Package: 24x80ml</p>
-            <p>Price: $2.00</p>
-            <input type="number" id="quantity-68770743" value="1" min="1" max="10">
-            <button class="add-button" onclick="addToCart(this, 'MAGNUM VANILLA ALMOND', 2, '68770743')">Add</button>
-        </div>
-        <!-- Add more products similarly -->
-    </div>
+    <!-- Header Section -->
+    <header>
+        Product List
+    </header>
 
-    <div class="total-price" id="totalPrice">Total: $0.00</div>
-    <button class="buy-now-button" onclick="showCartOverlay()">Place Order</button>
-
-    <div class="cart-overlay" id="cartOverlay">
-        <div class="cart-overlay-content">
-            <h2>Shopping Cart</h2>
-            <div id="cartItems"></div>
-            <button class="buy-now-button" onclick="proceedToBuy()">Proceed</button>
-        </div>
-    </div>
-
-    <div class="notification" id="notification">
-        Please confirm your order. Once confirmed, please go back to Messenger and select "Proceed".
-        <button onclick="editOrder()">Edit Order</button>
+    <!-- Product Container -->
+    <div class="product-container" id="product-container">
+        <!-- Products will be injected here by JavaScript -->
     </div>
 
     <script>
-        let cart = [];
-
-        function addToCart(button, name, price, sku) {
-            button.classList.add("added");
-            button.innerText = "Added";
-
-            const quantity = parseInt(document.getElementById(`quantity-${sku}`).value);
-            const existingItem = cart.find(item => item.sku === sku);
-            if (existingItem) {
-                existingItem.quantity += quantity;
-            } else {
-                cart.push({ name, price, sku, quantity });
-            }
-
-            updateCartTotal();
-        }
-
-        function updateCartTotal() {
-            const totalPriceEl = document.getElementById('totalPrice');
-            let total = 0;
-
-            cart.forEach(item => {
-                total += item.price * item.quantity;
-            });
-
-            totalPriceEl.innerText = `Total: $${total.toFixed(2)}`;
-        }
-
-        function showCartOverlay() {
-            const cartOverlay = document.getElementById('cartOverlay');
-            cartOverlay.style.display = 'flex';
-            updateCartDisplay();
-        }
-
-        function updateCartDisplay() {
-            const cartContainer = document.getElementById('cartItems');
-            cartContainer.innerHTML = ''; // Clear current cart display
-
-            cart.forEach((item, index) => {
-                const cartItem = document.createElement('div');
-                cartItem.classList.add('cart-item');
-                cartItem.innerHTML = `
-                    <div class="cart-item-info">
-                        <img src="https://via.placeholder.com/50" alt="${item.name}">
-                        <div>
-                            <p><strong>${item.name}</strong></p>
-                            <p>SKU: ${item.sku}</p>
-                            <p>Quantity: ${item.quantity}</p>
-                            <p>Price: $${(item.price * item.quantity).toFixed(2)}</p>
-                        </div>
-                    </div>
-                    <button class="remove-button" onclick="removeFromCart(${index})">Remove</button>
-                `;
-                cartContainer.appendChild(cartItem);
-            });
-        }
-
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            updateCartTotal();
-            updateCartDisplay();
-        }
-
-        function proceedToBuy() {
-            document.getElementById("notification").style.display = "block";
-        }
-
-        function editOrder() {
-            document.getElementById("notification").style.display = "none";
-            const cartOverlay = document.getElementById('cartOverlay');
-            cartOverlay.style.display = 'flex';
-        }
-
-        function checkout() {
-            // Prepare the order details for webhook
-            const orderData = {
-                event_name: "order_cart",
-                order_id: "12345", // Replace with dynamic order ID
-                cart_data: JSON.stringify(cart),
-                additional_data: {
-                    sender: "sender_id", // Add sender ID dynamically
-                    source: "source_name" // Add source dynamically
+        // Fetching data from the API
+        fetch('https://r3.cloud.yellow.ai/api/ai/botdata/table/673aee5bba24b9077aa10405/search?bot=x1678107644059', {
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+                'accept-language': 'en-US,en;q=0.9',
+                'content-type': 'application/json',
+                // Add any required cookies or headers from your original API request
+            },
+            body: JSON.stringify({
+                "query": {
+                    "skip": 0,
+                    "limit": 100,
+                    "sort": {
+                        "updated_at": {
+                            "order": "DESC"
+                        }
+                    }
                 }
-            };
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const products = data.data;
+            const container = document.getElementById('product-container');
 
-            fetch('https://r3.cloud.yellow.ai/api/galaxy/genericIntegration/customWebhook/a9c98444d592bfabb5a29389d07e/order_details', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(orderData),
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert('Order placed successfully!');
-            })
-            .catch(error => {
-                alert('Error placing order!');
+            // Loop through products and display them
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.classList.add('product-card');
+
+                // Create the product details
+                const productImage = product.s11 ? `<img src="${product.s11}" alt="${product.s2}">` : '';
+                const productName = product.s2;
+                const productPrice = product.s8 ? `<p class="price">$${product.s8}</p>` : '';
+
+                // Adding content to the card
+                productCard.innerHTML = `
+                    ${productImage}
+                    <h3>${productName}</h3>
+                    ${productPrice}
+                `;
+                
+                // Append card to the container
+                container.appendChild(productCard);
             });
-        }
+        })
+        .catch(error => {
+            console.error('Error fetching product data:', error);
+        });
     </script>
+
 </body>
 </html>
