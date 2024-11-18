@@ -81,7 +81,7 @@
         .buy-now-button:hover {
             background-color: darkred;
         }
-        
+
         .cart-overlay {
             position: fixed;
             top: 0;
@@ -131,51 +131,48 @@
             border-radius: 5px;
             font-size: 0.9em;
         }
+
+        .notification {
+            background-color: yellow;
+            color: black;
+            padding: 15px;
+            text-align: center;
+            margin: 20px 0;
+            font-weight: bold;
+            display: none;
+        }
     </style>
 </head>
 <body>
     <h1>Product List</h1>
 
     <div class="product-container">
-        <div class="product" data-name="Product 1" data-price="10" data-sku="P001">
-            <img src="https://cdn.yellowmessenger.com/OdroRSeDvtSI1730123184616.jpeg" alt="Product 1">
-            <h2>SKU: P001</h2>
-            <p>Package: 1 x 5 items</p>
-            <p>Total Price: $10.00</p>
-            <button class="add-button" onclick="addToCart(this, 'Product 1', 10, 'P001')">Add</button>
+        <!-- Add your product details here. Example format -->
+        <div class="product" data-name="MAGNUM VANILLA ALMOND" data-price="10" data-sku="68770743">
+            <img src="https://via.placeholder.com/150" alt="MAGNUM VANILLA ALMOND">
+            <h2>MAGNUM VANILLA ALMOND</h2>
+            <p>Package: 24x80ml</p>
+            <p>Price: $2.00</p>
+            <input type="number" id="quantity-68770743" value="1" min="1" max="10">
+            <button class="add-button" onclick="addToCart(this, 'MAGNUM VANILLA ALMOND', 2, '68770743')">Add</button>
         </div>
-        <div class="product" data-name="Product 2" data-price="15" data-sku="P002">
-            <img src="https://cdn.yellowmessenger.com/OdroRSeDvtSI1730123184616.jpeg" alt="Product 2">
-            <h2>SKU: P002</h2>
-            <p>Package: 1 x 10 items</p>
-            <p>Total Price: $15.00</p>
-            <button class="add-button" onclick="addToCart(this, 'Product 2', 15, 'P002')">Add</button>
-        </div>
-        <div class="product" data-name="Product 3" data-price="20" data-sku="P003">
-            <img src="https://cdn.yellowmessenger.com/OdroRSeDvtSI1730123184616.jpeg" alt="Product 3">
-            <h2>SKU: P003</h2>
-            <p>Package: 1 x 15 items</p>
-            <p>Total Price: $20.00</p>
-            <button class="add-button" onclick="addToCart(this, 'Product 3', 20, 'P003')">Add</button>
-        </div>
-        <div class="product" data-name="Product 4" data-price="25" data-sku="P004">
-            <img src="https://cdn.yellowmessenger.com/OdroRSeDvtSI1730123184616.jpeg" alt="Product 4">
-            <h2>SKU: P004</h2>
-            <p>Package: 1 x 20 items</p>
-            <p>Total Price: $25.00</p>
-            <button class="add-button" onclick="addToCart(this, 'Product 4', 25, 'P004')">Add</button>
-        </div>
+        <!-- Add more products similarly -->
     </div>
 
     <div class="total-price" id="totalPrice">Total: $0.00</div>
-    <button class="buy-now-button" onclick="showCartOverlay()">Buy Now</button>
+    <button class="buy-now-button" onclick="showCartOverlay()">Place Order</button>
 
     <div class="cart-overlay" id="cartOverlay">
         <div class="cart-overlay-content">
             <h2>Shopping Cart</h2>
             <div id="cartItems"></div>
-            <button class="buy-now-button" onclick="checkout()">Proceed to Buy</button>
+            <button class="buy-now-button" onclick="proceedToBuy()">Proceed</button>
         </div>
+    </div>
+
+    <div class="notification" id="notification">
+        Please confirm your order. Once confirmed, please go back to Messenger and select "Proceed".
+        <button onclick="editOrder()">Edit Order</button>
     </div>
 
     <script>
@@ -185,12 +182,14 @@
             button.classList.add("added");
             button.innerText = "Added";
 
+            const quantity = parseInt(document.getElementById(`quantity-${sku}`).value);
             const existingItem = cart.find(item => item.sku === sku);
             if (existingItem) {
-                existingItem.quantity += 1;
+                existingItem.quantity += quantity;
             } else {
-                cart.push({ name, price, sku, quantity: 1 });
+                cart.push({ name, price, sku, quantity });
             }
+
             updateCartTotal();
         }
 
@@ -220,7 +219,7 @@
                 cartItem.classList.add('cart-item');
                 cartItem.innerHTML = `
                     <div class="cart-item-info">
-                        <img src="https://cdn.yellowmessenger.com/OdroRSeDvtSI1730123184616.jpeg" alt="${item.name}">
+                        <img src="https://via.placeholder.com/50" alt="${item.name}">
                         <div>
                             <p><strong>${item.name}</strong></p>
                             <p>SKU: ${item.sku}</p>
@@ -240,14 +239,42 @@
             updateCartDisplay();
         }
 
-        function checkout() {
-            alert("Proceeding to checkout with total amount: " + document.getElementById('totalPrice').innerText);
-            closeCartOverlay();
+        function proceedToBuy() {
+            document.getElementById("notification").style.display = "block";
         }
 
-        function closeCartOverlay() {
+        function editOrder() {
+            document.getElementById("notification").style.display = "none";
             const cartOverlay = document.getElementById('cartOverlay');
-            cartOverlay.style.display = 'none';
+            cartOverlay.style.display = 'flex';
+        }
+
+        function checkout() {
+            // Prepare the order details for webhook
+            const orderData = {
+                event_name: "order_cart",
+                order_id: "12345", // Replace with dynamic order ID
+                cart_data: JSON.stringify(cart),
+                additional_data: {
+                    sender: "sender_id", // Add sender ID dynamically
+                    source: "source_name" // Add source dynamically
+                }
+            };
+
+            fetch('https://r3.cloud.yellow.ai/api/galaxy/genericIntegration/customWebhook/a9c98444d592bfabb5a29389d07e/order_details', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(orderData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Order placed successfully!');
+            })
+            .catch(error => {
+                alert('Error placing order!');
+            });
         }
     </script>
 </body>
