@@ -1,141 +1,624 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Product List</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: white;
-      color: black;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background-color: red;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-    .product-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 20px;
-      padding: 20px;
-    }
-    .product-card {
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      text-align: center;
-      background-color: #f9f9f9;
-    }
-    .product-card img {
-      width: 100%;
-      height: 250px;
-      object-fit: cover;
-    }
-    .product-card h3 {
-      padding: 15px;
-      font-size: 18px;
-    }
-    .product-card p {
-      font-size: 14px;
-      color: #555;
-      padding: 0 15px;
-      margin-bottom: 10px;
-    }
-    .product-card .price {
-      font-size: 16px;
-      color: green;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
-
-  <header>
-    <h1>Product List</h1>
-  </header>
-
-  <div class="product-list" id="product-list">
-    <!-- Products will be displayed here -->
-  </div>
-
-  <script>
-    async function fetchProducts() {
-      // API headers
-      const myHeaders = new Headers();
-      myHeaders.append("content-type", "application/json");
-      myHeaders.append("x-api-key", "SIUzc-OyIBvr1I8TQ7pH8q55Gs5IPhxxOXTbJrUx");
-
-      // API request body
-      const raw = JSON.stringify({
-        "query": {
-          "skip": 0,
-          "limit": 100,
-          "sort": {
-            "updated_at": {
-              "order": "DESC"
-            }
-          }
-        }
-      });
-
-      // Request options
-      const requestOptions = {
-        method: "POST",
-        headers: myHeaders,
-        body: raw,
-        redirect: "follow"
-      };
-
-      try {
-        // Make the API call
-        const response = await fetch("https://r3.cloud.yellow.ai/api/ai/botdata/table/673aee5bba24b9077aa10405/search?bot=x1678107644059", requestOptions);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        
-        const result = await response.json();
-        
-        if (result.success) {
-          displayProducts(result.data);
-        } else {
-          alert("Error fetching data from API.");
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        alert("Failed to fetch products.");
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Selecta Products</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        overflow-x: hidden;
       }
+
+      .header {
+        background-color: rgb(228, 3, 44);
+        height: 8.18vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        position: relative;
+        font-size: 2em;
+      }
+
+      .header-logo {
+        max-width: 60px;
+        max-height: 60px;
+        margin-right: 20px;
+      }
+
+      .footer {
+        background-color: rgb(228, 3, 44);
+        height: 1vh;
+        text-align: center;
+        color: white;
+        font-size: 14px;
+        margin-top: auto;
+      }
+
+      .container {
+        display: flex;
+        flex: 1;
+        box-sizing: border-box;
+      }
+
+      .product-list {
+        flex: 1;
+        padding: 20px;
+        background-color: #fff;
+        box-sizing: border-box;
+        overflow: auto;
+      }
+
+      .cart {
+        flex: 0 0 25%;
+        padding: 20px;
+        background-color: #fff;
+        box-sizing: border-box;
+        max-width: 400px;
+        display: none;
+        position: fixed;
+        right: 0;
+        top: 0;
+        height: 100%;
+        overflow-y: auto;
+        z-index: 10;
+        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
+      }
+
+      .cart-active {
+        display: block;
+      }
+
+      .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+      }
+
+      .product {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .product img {
+        max-width: 100%;
+        max-height: 150px; /* Ensure image fits within the product card */
+        object-fit: contain;
+        margin-bottom: 10px;
+      }
+
+      .product h3 {
+        font-size: 14px;
+        margin: 10px 0;
+      }
+
+      .price {
+        font-size: 14px;
+        font-weight: bold;
+        margin-top: 10px;
+        color: rgb(70, 169, 22);
+      }
+
+      .add-to-cart-btn {
+        font-size: 16px;
+        padding: 8px 16px;
+        background-color: rgb(0, 160, 214);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+
+      .quantity-controls {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+      }
+/* General Popup Style */
+.confirmation-popup,
+.thank-you-popup {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.popup-content {
+  background-color: white;
+  padding: 30px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  max-width: 400px;
+}
+
+button {
+  margin: 10px;
+  padding: 10px 20px;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+}
+
+button.confirm-btn {
+  background-color: rgb(0, 160, 214); /* Button color */
+  color: white;
+}
+
+button.cancel-btn {
+  background-color: #ccc;
+  color: black;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+      .quantity-btn {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+        font-size: 16px;
+        border-radius: 4px;
+        margin: 0 5px;
+      }
+
+      .quantity {
+        font-size: 16px;
+        font-weight: bold;
+        margin: 0 5px;
+        width: 30px;
+        text-align: center;
+      }
+
+      .cart-button {
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 24px;
+        color: #2196f3;
+      }
+
+      .proceed-btn {
+        background-color: #28a745;
+        color: white;
+        padding: 12px;
+        font-size: 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+      }
+
+      .proceed-btn:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+      }
+
+      .notification-badge {
+        position: absolute;
+        top: -5px;
+        right: -10px;
+        background: red;
+        color: white;
+        border-radius: 50%;
+        padding: 5px 8px;
+        font-size: 12px;
+      }
+
+      .check-cart-btn {
+        display: none;
+        width: 100%;
+        background-color: #4caf50;
+        color: white;
+        padding: 15px;
+        border: none;
+        text-align: center;
+        cursor: pointer;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+      }
+
+      .cart-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #ddd;
+        padding: 10px 0;
+      }
+
+      .cart-item button {
+        background: none;
+        border: none;
+        color: red;
+        cursor: pointer;
+        font-size: 18px;
+      }
+
+      .total {
+        font-size: 1.2em;
+        font-weight: bold;
+        margin-top: 15px;
+        padding-top: 10px;
+        border-top: 1px solid #ddd;
+      }
+
+      .back-to-products-btn {
+        background-color: #ff5722;
+        color: white;
+        padding: 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 20px;
+        width: 100%;
+        text-align: center;
+        display: none;
+      }
+      @media (min-width: 1025px) {
+  .cart {
+    display: block;   /* Ensure the cart is always visible on larger screens */
+    position: relative;
+  }
+
+  .cart-button,
+  .check-cart-btn {
+    display: none;   /* Hide cart buttons on larger screens */
+  }
+}
+
+@media (max-width: 1024px) {
+  .cart {
+    display: none;    /* Hide cart by default on smaller screens */
+  }
+  .back-to-products-btn {
+    display: none; /* Hide Back to Products on larger screens */
+  }
+  .cart-active {
+    display: block;   /* Show cart when the 'cart-active' class is added */
+  }
+}
+
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <img
+        src="https://cdn.yellowmessenger.com/DDIMxqEuN5Dh1731931204426.png"
+        alt="Logo"
+        class="header-logo"
+      />
+      Selecta PartyProducts
+    </div>
+
+    <button class="cart-button" onclick="toggleCart()">
+      🛒
+      <span
+        id="notification-badge"
+        class="notification-badge"
+        style="display: none"
+        >0</span
+      >
+    </button>
+    
+    <div class="container">
+      <!-- Product List -->
+      <div class="product-list">
+        <h2>Products</h2>
+        <div class="product-grid" id="product-list"></div>
+      </div>
+
+      <!-- Cart -->
+      <div class="cart" id="cart-container">
+        <h2>Cart</h2>
+        <div id="cart-items"></div>
+        <div class="total">Total: ₱<span id="total-amount">0.00</span></div>
+        <button class="proceed-btn" id="proceed-btn" onclick="proceedToOrder()" disabled>Proceed</button>
+        <button class="back-to-products-btn" onclick="closeCart()">Back to Product List</button>
+        </button>
+      </div>
+    </div>
+
+    <button class="check-cart-btn" onclick="toggleCart()">Check Cart</button>
+
+    <div class="footer">Footer Content</div>
+
+    <script>
+      const products = [
+        {
+          sku: 68770743,
+          name: "MAGNUM VANILLA ALMOND 24X80ML",
+          price: 2040,
+          image:
+            "https://cdn.yellowmessenger.com/cLkVulNKfxdP1731914984229.png",
+        },
+        {
+          sku: 68770746,
+          name: "MAGNUM VANILLA CLASSIC 24X80ML",
+          price: 2040,
+          image:
+            "https://cdn.yellowmessenger.com/w5ZLl6H1scXO1731914886787.png",
+        },
+      ];
+
+      let cart = [];
+
+      function renderProducts() {
+        const productListElement = document.getElementById("product-list");
+        productListElement.innerHTML = ""; // Clear the product list before rendering
+
+        products.forEach((product) => {
+          const productElement = document.createElement("div");
+          productElement.classList.add("product");
+          productElement.innerHTML = `
+            <img src="${product.image}" alt="${product.name}" />
+            <h3>${product.name}</h3>
+            <div class="price">₱${product.price}</div>
+            <div class="quantity-controls">
+              <button class="quantity-btn" onclick="adjustQuantity(${product.sku}, -1)">-</button>
+              <span id="quantity-${product.sku}" class="quantity">1</span>
+              <button class="quantity-btn" onclick="adjustQuantity(${product.sku}, 1)">+</button>
+            </div>
+            <button class="add-to-cart-btn" onclick="addToCart(${product.sku})">Add to Cart</button>
+          `;
+          productListElement.appendChild(productElement);
+        });
+      }
+
+      function adjustQuantity(sku, change) {
+        const product = products.find((p) => p.sku === sku);
+        const quantityElement = document.getElementById(`quantity-${sku}`);
+        let quantity = parseInt(quantityElement.textContent);
+
+        quantity += change;
+        if (quantity < 1) quantity = 1;
+
+        quantityElement.textContent = quantity;
+      }
+
+      function addToCart(sku) {
+        const product = products.find((p) => p.sku === sku);
+        const quantityElement = document.getElementById(`quantity-${sku}`);
+        const quantity = parseInt(quantityElement.textContent);
+
+        const existingProduct = cart.find((p) => p.sku === sku);
+
+        if (existingProduct) {
+          existingProduct.quantity += quantity;
+        } else {
+          cart.push({ ...product, quantity });
+        }
+
+        renderCart();
+        updateNotificationBadge();
+      }
+
+      function removeFromCart(sku) {
+        const productIndex = cart.findIndex((p) => p.sku === sku);
+
+        if (productIndex > -1) {
+          cart.splice(productIndex, 1);
+        }
+
+        renderCart();
+        updateNotificationBadge();
+      }
+
+      function renderCart() {
+  const cartItemsElement = document.getElementById("cart-items");
+  const totalAmountElement = document.getElementById("total-amount");
+
+  cartItemsElement.innerHTML = ""; // Clear the cart before rendering
+  let total = 0;
+
+  cart.forEach((item) => {
+    total += item.price * item.quantity;
+    const cartItemElement = document.createElement("div");
+    cartItemElement.classList.add("cart-item");
+    cartItemElement.innerHTML = `
+      <div>${item.name} x${item.quantity}</div>
+      <div>₱${item.price * item.quantity}</div>
+      <div class="quantity-controls">
+        <button class="quantity-btn" onclick="adjustQuantityInCart(${item.sku}, -1)">-</button>
+        <span class="quantity">${item.quantity}</span>
+        <button class="quantity-btn" onclick="adjustQuantityInCart(${item.sku}, 1)">+</button>
+      </div>
+      <button onclick="removeFromCart(${item.sku})">🗑️</button>
+    `;
+    cartItemsElement.appendChild(cartItemElement);
+  });
+
+  totalAmountElement.textContent = total.toFixed(2);
+  document.getElementById("proceed-btn").disabled = cart.length === 0;
+  updateCartVisibility();
+}
+
+function adjustQuantityInCart(sku, change) {
+  const item = cart.find((p) => p.sku === sku);
+  if (item) {
+    item.quantity += change;
+    if (item.quantity < 1) item.quantity = 1;
+    renderCart(); // Re-render the cart with updated quantities
+  }
+}
+
+
+      function updateNotificationBadge() {
+        const badge = document.getElementById("notification-badge");
+        const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
+
+        if (itemCount > 0) {
+          badge.textContent = itemCount;
+          badge.style.display = "inline-block";
+        } else {
+          badge.style.display = "none";
+        }
+      }
+
+      function toggleCart() {
+  const cartContainer = document.getElementById("cart-container");
+  cartContainer.classList.toggle("cart-active");
+  handleResize(); // Ensure button visibility updates after toggling
+}
+
+
+// Close the cart when clicking 'Back to Product List'
+function closeCart() {
+  const cartContainer = document.getElementById("cart-container");
+  cartContainer.classList.remove("cart-active"); // Remove the active class
+  cartContainer.style.display = "none"; // Explicitly hide the cart container
+
+  // Update the visibility of the 'Check Cart' button
+  const checkCartBtn = document.querySelector(".check-cart-btn");
+  if (cart.length > 0 && window.innerWidth <= 1024) {
+    checkCartBtn.style.display = "block";
+  } else {
+    checkCartBtn.style.display = "none";
+  }
+}
+
+
+
+
+      function updateCartVisibility() {
+        const cartContainer = document.getElementById("cart-container");
+        const checkCartBtn = document.querySelector(".check-cart-btn");
+
+        if (cart.length > 0) {
+          cartContainer.style.display = "block";
+          checkCartBtn.style.display = "none";
+        } else {
+          cartContainer.style.display = "none";
+          checkCartBtn.style.display = "block";
+        }
+      }
+// Adjust quantity inside the cart
+function adjustQuantityInCart(sku, change) {
+  const item = cart.find((p) => p.sku === sku);
+  if (item) {
+    item.quantity += change;
+    if (item.quantity < 1) item.quantity = 1;
+    renderCart(); // Re-render the cart with updated quantities
+  }
+}
+
+// Proceed to order (send to webhook)
+function proceedToOrder() {
+  const orderId = "URIC" + Math.floor(Math.random() * 1000000).toString().padStart(6, "0");
+
+  const cartData = cart.map(item => ({
+    name: item.name,
+    quantity: item.quantity,
+    price: item.price,
+  }));
+
+  const payload = {
+    event_name: "order_cart",
+    order_id: orderId,
+    cart_data: JSON.stringify(cartData),
+    additional_data: {
+      sender: "webshop",
+      source: "website"
     }
+  };
 
-    // Function to display products on the page
-    function displayProducts(products) {
-      const productList = document.getElementById('product-list');
-      productList.innerHTML = ''; // Clear existing content
+  // Show confirmation popup regardless of API response
+  fetch("https://r3.cloud.yellow.ai/api/galaxy/genericIntegration/customWebhook/a9c98444d592bfabb5a29389d07e/order_details", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to submit order');
+      }
+      return response.json();
+    })
+    .catch(error => {
+      console.error("Error processing order:", error);
+    })
+    .finally(() => {
+      // Always show the confirmation popup
+      document.getElementById("confirmation-popup").style.display = "flex";
+    });
+}
 
-      products.forEach(product => {
-        const productCard = document.createElement('div');
-        productCard.classList.add('product-card');
+// Handle confirmation
+function confirmOrder() {
+  document.getElementById("confirmation-popup").style.display = "none"; // Hide confirmation popup
+  document.getElementById("thank-you-popup").style.display = "flex";    // Show thank you popup
+}
 
-        productCard.innerHTML = `
-          <img src="${product.s11 || 'https://via.placeholder.com/250x250'}" alt="${product.s2}">
-          <h3>${product.s2}</h3>
-          <p>${product.s9 || 'No description available'}</p>
-          <p class="price">${product.s8 ? `$${product.s8}` : 'Price not available'}</p>
-        `;
+// Handle cancellation
+function cancelOrder() {
+  document.getElementById("confirmation-popup").style.display = "none"; // Simply hide the confirmation popup
+}
 
-        productList.appendChild(productCard);
-      });
-    }
 
-    // Fetch products when the page loads
-    window.onload = fetchProducts;
-  </script>
+// Ensure the cart is visible on larger screens and hidden on mobile
+function handleResize() {
+  const backButton = document.querySelector(".back-to-products-btn");
+  const cartContainer = document.getElementById("cart-container");
 
-</body>
+  if (window.innerWidth <= 1024) {
+    backButton.style.display = "block"; // Show the button on smaller screens
+    cartContainer.classList.remove("cart-active"); // Ensure the cart is hidden by default
+  } else {
+    backButton.style.display = "none";  // Hide the button on larger screens
+    cartContainer.style.display = "block"; // Ensure the cart is always visible on larger screens
+  }
+}
+
+// Call handleResize on load and whenever the window is resized
+window.addEventListener("resize", handleResize);
+window.addEventListener("load", handleResize);
+document.querySelector(".back-to-products-btn").addEventListener("click", closeCart);
+
+      renderProducts();
+    </script>
+    <div id="confirmation-popup" class="confirmation-popup">
+      <div class="popup-content">
+        <p>Your order has been received. Do you confirm?</p>
+        <button class="confirm-btn" onclick="confirmOrder()">Yes</button>
+        <button class="cancel-btn" onclick="cancelOrder()">No</button>
+      </div>
+    </div>
+    
+    <!-- Thank You Popup -->
+    <div id="thank-you-popup" class="thank-you-popup">
+      <div class="popup-content">
+        <h2>THANK YOU!</h2>
+        <p>Please proceed to our <a href="https://www.facebook.com/messages/t/518909704628761" target="_blank">Facebook page</a> for more information.</p>
+      </div>
+    </div>
+  </body>
 </html>
