@@ -356,21 +356,86 @@ button:hover {
 const sender = urlParams.get('sender') || 'default_sender';
 const source = urlParams.get('source') || 'default_source';
       const products = [
-        {
-          sku: 68770743,
-          name: "MAGNUM VANILLA ALMOND 24X80ML",
-          price: 2040,
-          image:
-            "https://cdn.yellowmessenger.com/cLkVulNKfxdP1731914984229.png",
-        },
-        {
-          sku: 68770746,
-          name: "MAGNUM VANILLA CLASSIC 24X80ML",
-          price: 2040,
-          image:
-            "https://cdn.yellowmessenger.com/w5ZLl6H1scXO1731914886787.png",
-        },
-      ];
+  {
+    "sku": 68770743,
+    "name": "MAGNUM VANILLA ALMOND 24X80ML",
+    "price": 2040,
+    "image": "https://cdn.yellowmessenger.com/cLkVulNKfxdP1731914984229.png"
+  },
+  {
+    "sku": 68770746,
+    "name": "MAGNUM VANILLA CLASSIC 24X80ML",
+    "price": 2040,
+    "image": "https://cdn.yellowmessenger.com/w5ZLl6H1scXO1731914886787.png"
+  },
+  {
+    "sku": 69968526,
+    "name": "MAGNUM CHOCOLATE LUXE 24X80ML",
+    "price": 2040,
+    "image": "https://cdn.yellowmessenger.com/dVvWvxmYDdBB1731914311041.png"
+  },
+  {
+    "sku": 68773882,
+    "name": "MAGNUM MINI VANILLA ALMOND 6X(6X45ML)",
+    "price": 1800,
+    "image": ""
+  },
+  {
+    "sku": 64333401,
+    "name": "MAGNUM MINI CL&AL&CCRM RL3 6X(6X45ML)",
+    "price": 1800,
+    "image": "https://cdn.yellowmessenger.com/jZd4FbJ1NsBv1731912596633.png"
+  },
+  {
+    "sku": 68814235,
+    "name": "MAGNUM MINI CL&AL&BR HB 6X(6X45ML)",
+    "price": 1800,
+    "image": "https://cdn.yellowmessenger.com/tbZT2hcd5UQQ1731912513516.png"
+  },
+  {
+    "sku": 64364114,
+    "name": "WALL'S WINNIE THE POOH 24X90ML (60G)",
+    "price": 720,
+    "image": "https://cdn.yellowmessenger.com/lAsDvGFSgFfw1731914520067.png"
+  },
+  {
+    "sku": 68783846,
+    "name": "WALL'S BITES VAN & CARA V3 24X(4X15G)",
+    "price": 720,
+    "image": "https://cdn.yellowmessenger.com/08rFJmLKZS961731914956704.png"
+  },
+  {
+    "sku": 69748812,
+    "name": "CORNETTO DISC BLACK CHCO COOKIE 24X115ML",
+    "price": 840,
+    "image": ""
+  },
+  {
+    "sku": 69748811,
+    "name": "CORNETTO DISC WHITE CHOCO C&C 24X115ML",
+    "price": 840,
+    "image": ""
+  },
+  {
+    "sku": 62729374,
+    "name": "CORNETTO DISC MATCHA CRUMBLE 24X115ML",
+    "price": 840,
+    "image": ""
+  },
+  {
+    "sku": 21051151,
+    "name": "CORNETTO CHOCOLATE 24X110ML",
+    "price": 600,
+    "image": "https://cdn.yellowmessenger.com/0CDNJIk4prRq1731914687336.png"
+  },
+  {
+    "sku": 67052108,
+    "name": "CORNETTO POOH COOKIES & DREAM 24X110ML",
+    "price": 600,
+    "image": "https://cdn.yellowmessenger.com/9BCeNu0CcZlB1731914720370.png"
+  }
+]
+;
 
       let cart = [];
 
@@ -491,7 +556,7 @@ function adjustQuantityInCart(sku, change) {
   const cartContainer = document.getElementById("cart-container");
   cartContainer.classList.toggle("cart-active");
 
-  // Show or hide based on state
+  // Ensure proper display based on state
   if (cartContainer.classList.contains("cart-active")) {
     cartContainer.style.display = "block";
   } else {
@@ -541,6 +606,7 @@ function proceedToOrder() {
 function confirmOrder() {
   const orderId = "URIC" + Math.floor(Math.random() * 1000000).toString().padStart(6, "0");
 
+  // Prepare cart data in the required format
   const cartData = cart.map(item => ({
     name: item.name,
     quantity: item.quantity,
@@ -550,34 +616,34 @@ function confirmOrder() {
   const payload = {
     event_name: "order_cart",
     order_id: orderId,
-    cart_data: JSON.stringify(cartData),
+    cart_data: cartData,
     additional_data: {
       sender: sender,
       source: source
     }
   };
 
-  fetch("https://r3.cloud.yellow.ai/api/galaxy/genericIntegration/customWebhook/a9c98444d592bfabb5a29389d07e/payment_result", {
-    method: "POST",
-    headers: { "Content-Type": "application/json","x-api-key": "SIUzc-OyIBvr1I8TQ7pH8q55Gs5IPhxxOXTbJrUx" },
-    body: JSON.stringify(payload),
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Failed to submit order');
-    }
-    return response.json();
-  })
-  .then(() => {
-    document.getElementById("confirmation-popup").style.display = "none";
-    document.getElementById("thank-you-popup").style.display = "flex";
-  })
-  .catch(error => {
-    console.error("Error processing order:", error);
-    document.getElementById("confirmation-popup").style.display = "none";
-    document.getElementById("error-popup").style.display = "flex"; // Show error popup
-  });
+  // Send data via postMessage to the parent window
+  window.parent.postMessage(
+    JSON.stringify({
+      event_code: "ym-client-event",
+      data: JSON.stringify({
+        event: {
+          code: "user-data",
+          data: {
+            userdetails: payload,
+          },
+        },
+      }),
+    }),
+    "*"
+  );
+
+  // Close the confirmation popup and show the thank you message
+  document.getElementById("confirmation-popup").style.display = "none";
+  document.getElementById("thank-you-popup").style.display = "flex";
 }
+
 
 function closeErrorPopup() {
   document.getElementById("error-popup").style.display = "none";
