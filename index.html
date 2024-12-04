@@ -57,6 +57,7 @@
       }
 
       .cart {
+        display: none;
         flex: 0 0 25%;
         padding: 20px;
         background-color: #fff;
@@ -351,6 +352,9 @@ button:hover {
     <div class="footer">Footer Content</div>
 
     <script>
+      const urlParams = new URLSearchParams(window.location.search);
+const sender = urlParams.get('sender') || 'default_sender';
+const source = urlParams.get('source') || 'default_source';
       const products = [
         {
           sku: 68770743,
@@ -404,21 +408,22 @@ button:hover {
       }
 
       function addToCart(sku) {
-        const product = products.find((p) => p.sku === sku);
-        const quantityElement = document.getElementById(`quantity-${sku}`);
-        const quantity = parseInt(quantityElement.textContent);
+  const product = products.find((p) => p.sku === sku);
+  const quantityElement = document.getElementById(`quantity-${sku}`);
+  const quantity = parseInt(quantityElement.textContent);
 
-        const existingProduct = cart.find((p) => p.sku === sku);
+  const existingProduct = cart.find((p) => p.sku === sku);
 
-        if (existingProduct) {
-          existingProduct.quantity += quantity;
-        } else {
-          cart.push({ ...product, quantity });
-        }
+  if (existingProduct) {
+    existingProduct.quantity += quantity;
+  } else {
+    cart.push({ ...product, quantity });
+  }
 
-        renderCart();
-        updateNotificationBadge();
-      }
+  renderCart();  // Update cart data without showing it
+  updateNotificationBadge();  // Update the badge indicator
+}
+
 
       function removeFromCart(sku) {
         const productIndex = cart.findIndex((p) => p.sku === sku);
@@ -457,8 +462,8 @@ button:hover {
 
   totalAmountElement.textContent = total.toFixed(2);
   document.getElementById("proceed-btn").disabled = cart.length === 0;
-  updateCartVisibility();
 }
+
 
 function adjustQuantityInCart(sku, change) {
   const item = cart.find((p) => p.sku === sku);
@@ -485,7 +490,13 @@ function adjustQuantityInCart(sku, change) {
       function toggleCart() {
   const cartContainer = document.getElementById("cart-container");
   cartContainer.classList.toggle("cart-active");
-  handleResize(); // Ensure button visibility updates after toggling
+
+  // Show or hide based on state
+  if (cartContainer.classList.contains("cart-active")) {
+    cartContainer.style.display = "block";
+  } else {
+    cartContainer.style.display = "none";
+  }
 }
 
 
@@ -508,17 +519,9 @@ function closeCart() {
 
 
       function updateCartVisibility() {
-        const cartContainer = document.getElementById("cart-container");
-        const checkCartBtn = document.querySelector(".check-cart-btn");
-
-        if (cart.length > 0) {
-          cartContainer.style.display = "block";
-          checkCartBtn.style.display = "none";
-        } else {
-          cartContainer.style.display = "none";
-          checkCartBtn.style.display = "block";
-        }
-      }
+  const checkCartBtn = document.querySelector(".check-cart-btn");
+  checkCartBtn.style.display = cart.length > 0 && window.innerWidth <= 1024 ? "block" : "none";
+}
 // Adjust quantity inside the cart
 function adjustQuantityInCart(sku, change) {
   const item = cart.find((p) => p.sku === sku);
@@ -531,6 +534,11 @@ function adjustQuantityInCart(sku, change) {
 
 // Proceed to order (send to webhook)
 function proceedToOrder() {
+  document.getElementById("confirmation-popup").style.display = "flex";
+}
+
+// Handle confirmation
+function confirmOrder() {
   const orderId = "URIC" + Math.floor(Math.random() * 1000000).toString().padStart(6, "0");
 
   const cartData = cart.map(item => ({
@@ -544,38 +552,35 @@ function proceedToOrder() {
     order_id: orderId,
     cart_data: JSON.stringify(cartData),
     additional_data: {
-      sender: "webshop",
-      source: "website"
+      sender: sender,
+      source: source
     }
   };
 
-  // Show confirmation popup regardless of API response
-  fetch("https://r3.cloud.yellow.ai/api/galaxy/genericIntegration/customWebhook/a9c98444d592bfabb5a29389d07e/order_details", {
+  fetch("https://r3.cloud.yellow.ai/api/galaxy/genericIntegration/customWebhook/a9c98444d592bfabb5a29389d07e/payment_result", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json","x-api-key": "SIUzc-OyIBvr1I8TQ7pH8q55Gs5IPhxxOXTbJrUx" },
     body: JSON.stringify(payload),
   })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Failed to submit order');
-      }
-      return response.json();
-    })
-    .catch(error => {
-      console.error("Error processing order:", error);
-    })
-    .finally(() => {
-      // Always show the confirmation popup
-      document.getElementById("confirmation-popup").style.display = "flex";
-    });
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Failed to submit order');
+    }
+    return response.json();
+  })
+  .then(() => {
+    document.getElementById("confirmation-popup").style.display = "none";
+    document.getElementById("thank-you-popup").style.display = "flex";
+  })
+  .catch(error => {
+    console.error("Error processing order:", error);
+    document.getElementById("confirmation-popup").style.display = "none";
+    document.getElementById("error-popup").style.display = "flex"; // Show error popup
+  });
 }
 
-// Handle confirmation
-function confirmOrder() {
-  document.getElementById("confirmation-popup").style.display = "none"; // Hide confirmation popup
-  document.getElementById("thank-you-popup").style.display = "flex";    // Show thank you popup
+function closeErrorPopup() {
+  document.getElementById("error-popup").style.display = "none";
 }
 
 // Handle cancellation
@@ -612,7 +617,13 @@ document.querySelector(".back-to-products-btn").addEventListener("click", closeC
         <button class="cancel-btn" onclick="cancelOrder()">No</button>
       </div>
     </div>
-    
+    <div id="error-popup" class="confirmation-popup">
+      <div class="popup-content">
+        <h2>Oops!</h2>
+        <p>There seems to be an issue processing your order. Please try again later or contact support.</p>
+        <button class="confirm-btn" onclick="closeErrorPopup()">OK</button>
+      </div>
+    </div>
     <!-- Thank You Popup -->
     <div id="thank-you-popup" class="thank-you-popup">
       <div class="popup-content">
