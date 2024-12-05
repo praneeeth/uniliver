@@ -17,21 +17,15 @@
       }
 
       .header {
-        background-color: rgb(228, 3, 44);
-        height: 8.18vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        position: relative;
-        font-size: 2em;
-      }
+  display: flex;
+  align-items: center;
+  padding: 10px;
+}
 
-      .header-logo {
-        max-width: 60px;
-        max-height: 60px;
-        margin-right: 20px;
-      }
+.header-logo {
+  width: 100px;  /* Adjust this value as needed for your logo size */
+  height: auto;
+}
 
       .footer {
         background-color: rgb(228, 3, 44);
@@ -103,7 +97,7 @@
       }
 
       .product h3 {
-        font-size: 14px;
+        font-size: 11px;
         margin: 10px 0;
       }
 
@@ -111,19 +105,19 @@
         font-size: 14px;
         font-weight: bold;
         margin-top: 10px;
-        color: rgb(70, 169, 22);
+        color: #e03b41;
       }
 
       .add-to-cart-btn {
-        font-size: 16px;
-        padding: 8px 16px;
-        background-color: rgb(0, 160, 214);
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        margin-top: 10px;
-      }
+    background-color: white;
+    color: #de2428;
+    transition: background-color 0.3s, color 0.3s;  /* Smooth transition for hover effect */
+}
+
+/* .add-to-cart-btn:hover {
+    background-color: #de2428;
+    color: white;
+} */
 
       .quantity-controls {
         display: flex;
@@ -177,7 +171,7 @@ button:hover {
 }
 
       .quantity-btn {
-        background-color: #4caf50;
+        background-color:#e03b41;
         color: white;
         border: none;
         padding: 5px 10px;
@@ -312,11 +306,11 @@ button:hover {
   <body>
     <div class="header">
       <img
-        src="https://cdn.yellowmessenger.com/DDIMxqEuN5Dh1731931204426.png"
+        src="https://cdn.yellowmessenger.com/OqX9x6coh4bs1733370822207.jpeg"
         alt="Logo"
         class="header-logo"
       />
-      Selecta PartyProducts
+    </div>
     </div>
 
     <button class="cart-button" onclick="toggleCart()">
@@ -449,7 +443,7 @@ const source = urlParams.get('source') || 'default_source';
           productElement.innerHTML = `
             <img src="${product.image}" alt="${product.name}" />
             <h3>${product.name}</h3>
-            <div class="price">₱${product.price}</div>
+            <div class="price">PHP ${product.price}</div>
             <div class="quantity-controls">
               <button class="quantity-btn" onclick="adjustQuantity(${product.sku}, -1)">-</button>
               <span id="quantity-${product.sku}" class="quantity">1</span>
