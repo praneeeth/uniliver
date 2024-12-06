@@ -595,15 +595,19 @@ function confirmOrder() {
         }));
 
         const payload = {
-          event_name: "order_cart",
-          order_id: orderId,
-          cart_data: cartData,
-          additional_data: {
-            sender: sender,  // Include sender from URL query parameters
-            source: source   // Include source from URL query parameters
-          }
-        };
-        console.log(payload, 'payload'); // Log the payload to confirm
+  order_id: orderId,
+  cart_data: cartData,
+  additional_data: {
+    sender: sender,  // Include sender from URL query parameters
+    source: source   // Include source from URL query parameters
+  }
+};
+
+// Convert the payload to a JSON string
+const payloadString = JSON.stringify(payload);
+
+// Log the stringified payload to confirm
+console.log(payloadString, 'payload string');
 
         // Send data via postMessage to the parent window
         window.parent.postMessage(
