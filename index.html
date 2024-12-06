@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Selecta Products</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.11.0/qs.min.js"></script>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -17,15 +18,15 @@
       }
 
       .header {
-  display: flex;
-  align-items: center;
-  padding: 10px;
-}
+        display: flex;
+        align-items: center;
+        padding: 10px;
+      }
 
-.header-logo {
-  width: 100px;  /* Adjust this value as needed for your logo size */
-  height: auto;
-}
+      .header-logo {
+        width: 100px; /* Adjust this value as needed for your logo size */
+        height: auto;
+      }
 
       .footer {
         background-color: rgb(228, 3, 44);
@@ -57,7 +58,6 @@
         background-color: #fff;
         box-sizing: border-box;
         max-width: 400px;
-        display: none;
         position: fixed;
         right: 0;
         top: 0;
@@ -91,7 +91,7 @@
 
       .product img {
         max-width: 100%;
-        max-height: 150px; /* Ensure image fits within the product card */
+        max-height: 150px;
         object-fit: contain;
         margin-bottom: 10px;
       }
@@ -109,69 +109,64 @@
       }
 
       .add-to-cart-btn {
-    background-color: white;
-    color: #de2428;
-    transition: background-color 0.3s, color 0.3s;  /* Smooth transition for hover effect */
-}
-
-/* .add-to-cart-btn:hover {
-    background-color: #de2428;
-    color: white;
-} */
+        background-color: white;
+        color: #de2428;
+        transition: background-color 0.3s, color 0.3s;
+      }
 
       .quantity-controls {
         display: flex;
         align-items: center;
         margin-top: 10px;
       }
-/* General Popup Style */
-.confirmation-popup,
-.thank-you-popup {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
 
-.popup-content {
-  background-color: white;
-  padding: 30px;
-  border-radius: 8px;
-  text-align: center;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-  max-width: 400px;
-}
+      .confirmation-popup,
+      .thank-you-popup {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
 
-button {
-  margin: 10px;
-  padding: 10px 20px;
-  cursor: pointer;
-  border: none;
-  border-radius: 4px;
-}
+      .popup-content {
+        background-color: white;
+        padding: 30px;
+        border-radius: 8px;
+        text-align: center;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        max-width: 400px;
+      }
 
-button.confirm-btn {
-  background-color: rgb(0, 160, 214); /* Button color */
-  color: white;
-}
+      button {
+        margin: 10px;
+        padding: 10px 20px;
+        cursor: pointer;
+        border: none;
+        border-radius: 4px;
+      }
 
-button.cancel-btn {
-  background-color: #ccc;
-  color: black;
-}
+      button.confirm-btn {
+        background-color: rgb(0, 160, 214);
+        color: white;
+      }
 
-button:hover {
-  opacity: 0.8;
-}
+      button.cancel-btn {
+        background-color: #ccc;
+        color: black;
+      }
+
+      button:hover {
+        opacity: 0.8;
+      }
 
       .quantity-btn {
-        background-color:#e03b41;
+        background-color: #e03b41;
         color: white;
         border: none;
         padding: 5px 10px;
@@ -179,14 +174,6 @@ button:hover {
         font-size: 16px;
         border-radius: 4px;
         margin: 0 5px;
-      }
-
-      .quantity {
-        font-size: 16px;
-        font-weight: bold;
-        margin: 0 5px;
-        width: 30px;
-        text-align: center;
       }
 
       .cart-button {
@@ -277,30 +264,24 @@ button:hover {
         text-align: center;
         display: none;
       }
+
       @media (min-width: 1025px) {
-  .cart {
-    display: block;   /* Ensure the cart is always visible on larger screens */
-    position: relative;
-  }
+        .cart {
+          display: block;
+          position: relative;
+        }
 
-  .cart-button,
-  .check-cart-btn {
-    display: none;   /* Hide cart buttons on larger screens */
-  }
-}
+        .cart-button,
+        .check-cart-btn {
+          display: none;
+        }
+      }
 
-@media (max-width: 1024px) {
-  .cart {
-    display: none;    /* Hide cart by default on smaller screens */
-  }
-  .back-to-products-btn {
-    display: none; /* Hide Back to Products on larger screens */
-  }
-  .cart-active {
-    display: block;   /* Show cart when the 'cart-active' class is added */
-  }
-}
-
+      @media (max-width: 1024px) {
+        .cart {
+          display: none;
+        }
+      }
     </style>
   </head>
   <body>
@@ -310,7 +291,6 @@ button:hover {
         alt="Logo"
         class="header-logo"
       />
-    </div>
     </div>
 
     <button class="cart-button" onclick="toggleCart()">
@@ -346,9 +326,18 @@ button:hover {
     <div class="footer">Footer Content</div>
 
     <script>
-      const urlParams = new URLSearchParams(window.location.search);
-const sender = urlParams.get('sender') || 'default_sender';
-const source = urlParams.get('source') || 'default_source';
+      let cart = [];
+      let sender = '';
+      let source = '';
+      window.addEventListener('load', (event) => {
+    console.log('Page is fully loaded');
+    
+    let { source, sender } = Qs.parse(location.search, { ignoreQueryPrefix: true });
+    
+
+    console.log('Source:', source);
+    console.log('Sender:', sender);
+});
       const products = [
   {
     "sku": 68770743,
@@ -428,10 +417,8 @@ const source = urlParams.get('source') || 'default_source';
     "price": 600,
     "image": "https://cdn.yellowmessenger.com/9BCeNu0CcZlB1731914720370.png"
   }
-]
-;
+];
 
-      let cart = [];
 
       function renderProducts() {
         const productListElement = document.getElementById("product-list");
@@ -598,45 +585,46 @@ function proceedToOrder() {
 
 // Handle confirmation
 function confirmOrder() {
-  const orderId = "URIC" + Math.floor(Math.random() * 1000000).toString().padStart(6, "0");
+        const orderId = "URIC" + Math.floor(Math.random() * 1000000).toString().padStart(6, "0");
 
-  // Prepare cart data in the required format
-  const cartData = cart.map(item => ({
-    name: item.name,
-    quantity: item.quantity,
-    price: item.price,
-  }));
+        // Prepare cart data in the required format
+        const cartData = cart.map(item => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+        }));
 
-  const payload = {
-    event_name: "order_cart",
-    order_id: orderId,
-    cart_data: cartData,
-    additional_data: {
-      sender: sender,
-      source: source
-    }
-  };
+        const payload = {
+          event_name: "order_cart",
+          order_id: orderId,
+          cart_data: cartData,
+          additional_data: {
+            sender: sender,  // Include sender from URL query parameters
+            source: source   // Include source from URL query parameters
+          }
+        };
+        console.log(payload, 'payload'); // Log the payload to confirm
 
-  // Send data via postMessage to the parent window
-  window.parent.postMessage(
-    JSON.stringify({
-      event_code: "ym-client-event",
-      data: JSON.stringify({
-        event: {
-          code: "user-data",
-          data: {
-            userdetails: payload,
-          },
-        },
-      }),
-    }),
-    "*"
-  );
+        // Send data via postMessage to the parent window
+        window.parent.postMessage(
+          JSON.stringify({
+            event_code: "ym-client-event",
+            data: JSON.stringify({
+              event: {
+                code: "user-data",
+                data: {
+                  userdetails: payload,
+                },
+              },
+            }),
+          }),
+          "*"
+        );
 
-  // Close the confirmation popup and show the thank you message
-  document.getElementById("confirmation-popup").style.display = "none";
-  document.getElementById("thank-you-popup").style.display = "flex";
-}
+        // Close the confirmation popup and show the thank you message
+        document.getElementById("confirmation-popup").style.display = "none";
+        document.getElementById("thank-you-popup").style.display = "flex";
+      }
 
 
 function closeErrorPopup() {
