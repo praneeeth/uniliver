@@ -586,7 +586,11 @@ function proceedToOrder() {
 // Handle confirmation
 function confirmOrder() {
         const orderId = "URIC" + Math.floor(Math.random() * 1000000).toString().padStart(6, "0");
+        let { source, sender } = Qs.parse(location.search, { ignoreQueryPrefix: true });
+    
 
+    console.log('Source:', source);
+    console.log('Sender:', sender);
         // Prepare cart data in the required format
         const cartData = cart.map(item => ({
           name: item.name,
